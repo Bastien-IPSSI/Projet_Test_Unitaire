@@ -1,0 +1,26 @@
+nav{
+    height: 100px;
+    background-color: rgba(0, 0, 0, 0.13);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.recettes{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+    margin-top: 50px;
+}
+
+.recette{
+    width: 300px;
+    height: 600px;
+    background-color: rgba(0, 0, 0, 0.319);
+    margin-bottom: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+}
