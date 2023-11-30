@@ -3,10 +3,10 @@
 require_once("./config.php");
 
 try {
-    $host = DBHOST;
-    $user = DBUSER;
-    $pwd = DBPWD;
-    $db_name = DBNAME;
+    $host = DB_HOST;
+    $user = DB_USER;
+    $pwd = DB_PWD;
+    $db_name = DB_NAME;
 
     $connexion = new PDO("mysql:host=$host;dbname=$db_name", $user, $pwd);
     $connexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -59,7 +59,48 @@ class Recette {
 }
 
 class RecetteDAO {
-    
+    private $bdd;
+
+    public function __construct($bdd)
+    {
+        $this->bdd = $bdd;
+    }
+
+    public function lister_recette($nom_recette){
+        try{
+            $requete = $this->bdd->prepare("SELECT * FROM recettes WHERE nom_recette=?");
+            $requete->execute([$nom_recette]);
+            $result = $requete->fetch(PDO::FETCH_ASSOC);
+            return $result;
+        }catch(PDOException $e){
+            echo "Erreur lors de la récupération des recettes ".$e->getMessage();
+            return [];
+        }
+    }
+
+    public function getID($nom_recette){
+        try{
+            $requete = $this->bdd->prepare("SELECT id FROM recettes WHERE nom_recette = ?");
+            $requete->execute([$nom_recette]);
+            return $requete;
+        }catch(PDOException $e){
+            echo "Erreur lors de la récupération de l'id de la recette ".$e->getMessage();
+            return;
+        }
+    }
+
+    public function afficher_la_recette($idRecette)
+    {
+        try{
+            $requete = $this->bdd->prepare("SELECT * FROM recettes WHERE id_recette=?");
+            $requete->execute([$idRecette]);
+            $result = $requete->fetch(PDO::FETCH_ASSOC);
+            return $result;
+        }catch(PDOException $e){
+            echo "Erreur lors de la réupération de l'ingrédient".$e->getMessage();
+            return [];
+        }
+    }
 
 }
 
@@ -84,7 +125,12 @@ class Ingredient{
 
 
 class IngredientDAO {
+    private $bdd;
 
+    public function __construct($bdd)
+    {
+        $this->bdd = $bdd;
+    }
 }
 
 class Categorie {
@@ -107,6 +153,12 @@ class Categorie {
 }
 
 class CategorieDAO {
+    private $bdd;
+
+    public function __construct($bdd)
+    {
+        $this->bdd = $bdd;
+    }
 
 }
 
