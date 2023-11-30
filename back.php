@@ -95,12 +95,12 @@ class RecetteDAO {
             return [];
         }
     }
-
     public function getID($nom_recette){
         try{
-            $requete = $this->bdd->prepare("SELECT id FROM recettes WHERE nom_recette = ?");
+            $requete = $this->bdd->prepare("SELECT id_recette FROM recettes WHERE nom_recette = ?");
             $requete->execute([$nom_recette]);
-            return $requete;
+            $resultat = $requete->fetch(PDO::FETCH_ASSOC);
+            return $resultat["id_recette"];
         }catch(PDOException $e){
             echo "Erreur lors de la récupération de l'id de la recette ".$e->getMessage();
             return;
@@ -142,11 +142,11 @@ class Ingredient{
         $this->nom_ingredient = $nom_ingredient;
     }
 
-    public function getNom_ingredient(){
+    public function getNomIngredient(){
         return $this->nom_ingredient;
     }
 
-    public function setNom_ingredient($nom_ingredient)
+    public function setNomIngredient($nom_ingredient)
     {
         $this->nom_ingredient = $nom_ingredient;
     }
@@ -161,6 +161,41 @@ private $db;
         $this->db = $db;
     }
 
+    public function getAllIngredientOfRecette($id_recette){
+        $ids_ingredient = [];
+        $ingredients = [];
+        try{
+            $requete = $this->db->prepare("SELECT id_ingredient FROM recetteingredient WHERE id_recette = :id_recette");
+            $requete->execute([
+                ":id_recette" => $id_recette
+            ]);
+            $resultat = $requete->fetchAll(PDO::FETCH_ASSOC);
+            foreach($resultat as $id_ingredient){
+                array_push($ids_ingredient, $id_ingredient["id_ingredient"]);
+            }
+        }
+        catch(Exception $e){
+            echo "Erreur lors de la récupération des ingrédients de la recette : ".$e->getMessage();
+            die();
+        }
+
+        foreach($ids_ingredient as $id_ingredient){
+            try{
+                $requete = $this->db->prepare("SELECT nom_ingredient FROM ingredients WHERE id_ingredient = :id_ingredient");
+                $requete->execute([
+                    ":id_ingredient" => $id_ingredient
+                ]);
+                $resultat = $requete->fetch(PDO::FETCH_ASSOC);
+                array_push($ingredients, new Ingredient($resultat["nom_ingredient"]));
+            }
+            catch(Exception $e){
+                echo "Erreur lors de la récupération des ingrédients de la recette : ".$e->getMessage();
+                die();
+            }
+        }
+        return $ingredients;
+    }
+
     public function getIdIngredient($nom_ingredient){
         try{
             $requete = $this->db->prepare("SELECT id_ingredient FROM ingredients WHERE nom_ingredient = :nom_ingredient");
@@ -172,6 +207,21 @@ private $db;
         }
         catch(Exception $e){
             echo "Erreur lors de la récupération de l'id de l'ingrédient : ".$e->getMessage();
+            die();
+        }
+    }
+
+    public function getIngredient($id_ingredient){
+        try{
+            $requete = $this->db->prepare("SELECT nom_ingredient FROM ingredients WHERE id_ingredient = :id_ingredient");
+            $requete->execute([
+                ":id_ingredient" => $id_ingredient
+            ]);
+            $resultat = $requete->fetch(PDO::FETCH_ASSOC);
+            return $resultat["nom_ingredient"];
+        }
+        catch(Exception $e){
+            echo "Erreur lors de la récupération de l'ingrédient : ".$e->getMessage();
             die();
         }
     }
