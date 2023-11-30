@@ -125,12 +125,7 @@ class Ingredient{
 
 
 class IngredientDAO {
-    private $bdd;
 
-    public function __construct($bdd)
-    {
-        $this->bdd = $bdd;
-    }
 }
 
 class Categorie {
@@ -153,12 +148,6 @@ class Categorie {
 }
 
 class CategorieDAO {
-    private $bdd;
-
-    public function __construct($bdd)
-    {
-        $this->bdd = $bdd;
-    }
 
 }
 
