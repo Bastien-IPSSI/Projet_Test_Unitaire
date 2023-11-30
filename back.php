@@ -125,7 +125,55 @@ class Ingredient{
 
 
 class IngredientDAO {
+private $db;
 
+    public function __construct($db)
+    {
+        $this->db = $db;
+    }
+
+    public function getIdIngredient($nom_ingredient){
+        try{
+            $requete = $this->db->prepare("SELECT id_ingredient FROM ingredients WHERE nom_ingredient = :nom_ingredient");
+            $requete->execute([
+                ":nom_ingredient" => $nom_ingredient
+            ]);
+            $resultat = $requete->fetch(PDO::FETCH_ASSOC);
+            return $resultat["id_ingredient"];
+        }
+        catch(Exception $e){
+            echo "Erreur lors de la récupération de l'id de l'ingrédient : ".$e->getMessage();
+            die();
+        }
+    }
+
+    public function addIngredient($nom_ingredient){
+        try{
+            $requete = $this->db->prepare("INSERT INTO ingredients(nom_ingredient) VALUES (:nom_ingredient)");
+            $requete->execute([
+                ":nom_ingredient" => $nom_ingredient
+            ]);
+        }
+        catch(Exception $e){
+            echo "Erreur lors de l'ajout de l'ingrédient : ".$e->getMessage();
+            die();
+        }
+    }
+
+    public function addIngredientToRecette($id_recette, $id_ingredient, $quantite){
+        try{
+            $requete = $this->db->prepare("INSERT INTO recettes_ingredients(id_recette, id_ingredient, quantite) VALUES (:id_recette, :id_ingredient, :quantite)");
+            $requete->execute([
+                ":id_recette" => $id_recette,
+                ":id_ingredient" => $id_ingredient,
+                ":quantite" => $quantite
+            ]);
+        }
+        catch(Exception $e){
+            echo "Erreur lors de l'ajout de l'ingrédient à la recette : ".$e->getMessage();
+            die();
+        }
+    }
 }
 
 class Categorie {
@@ -148,7 +196,27 @@ class Categorie {
 }
 
 class CategorieDAO {
+private $db;
 
+    public function __construct($db)
+    {
+        $this->db = $db;
+    }
+
+    public function getCategorie($id_categorie){
+        try{
+            $requete = $this->db->prepare("SELECT nom_categorie FROM categories WHERE id_categorie = :id_categorie");
+            $requete->execute([
+                ":id_categorie" => $id_categorie
+            ]);
+            $resultat = $requete->fetch(PDO::FETCH_ASSOC);
+            return $resultat["nom_categorie"];
+        }
+        catch(Exception $e){
+            echo "Erreur lors de la récupération de la catégorie : ".$e->getMessage();
+            die();
+        }
+    }
 }
 
 
