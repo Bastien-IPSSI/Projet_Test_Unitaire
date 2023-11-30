@@ -10,6 +10,16 @@
 
 <body>
     <nav>
+         <!-- Bouton qui renvoie vers l'accueil. Si on appuie sur ce bouton, on vide le $_POST["search"] -->
+        <form action="front.php" method="POST">
+            <input type="submit" name="accueil" value="Accueil">
+        </form>
+        <?php
+        if (isset($_POST["accueil"])) {
+            unset($_POST["search"]);
+        }
+        ?>
+        
         <h1>Recettes</h1>
         <!-- Création d'une barre de recherche -->
         <form action="front.php" method="GET">
@@ -25,6 +35,11 @@
             $recettesDAO = new RecetteDAO($connexion);
             $ingredientsDAO = new IngredientDAO($connexion);
             $recettes = $recettesDAO->afficher_recettes();
+        }else{
+            // Sinon, on affiche les recettes qui correspondent à la recherche
+            $recettesDAO = new RecetteDAO($connexion);
+            $ingredientsDAO = new IngredientDAO($connexion);
+            $recettes = $recettesDAO->rechercher_recette($_GET["search"]);
         }
 
         foreach ($recettes as $recette) {

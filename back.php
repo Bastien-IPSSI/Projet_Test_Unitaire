@@ -149,6 +149,23 @@ class RecetteDAO {
         }
     }
 
+    public function rechercher_recette($nom_recette){
+        $liste_recette = [];
+        try{
+            $requete = $this->bdd->prepare("SELECT * FROM recettes WHERE nom_recette LIKE ?");
+            $requete->execute(["%".$nom_recette."%"]);
+            $resultat = $requete->fetchAll(PDO::FETCH_ASSOC);
+            foreach($resultat as $recette){
+                $rec = new Recette($recette["nom_recette"], $recette["instructions"], $recette["tmp_prep"]);
+                array_push($liste_recette, $rec);
+            }
+            return $liste_recette;
+        }catch(PDOException $e){
+            echo "Erreur lors de la récupération ".$e->getMessage();
+            return [];
+        }
+    }
+
 }
 
 class Ingredient{
