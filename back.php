@@ -66,6 +66,18 @@ class RecetteDAO {
         $this->bdd = $bdd;
     }
 
+    public function afficher_recettes(){
+        try{
+            $requete = $this->bdd->prepare("SELECT * FROM recettes");
+            $requete->execute();
+            $resultat = $requete->fetch(PDO::FETCH_ASSOC);
+            return $resultat;
+        }catch(PDOException $e){
+            echo "Erreur lors de la récupération ".$e->getMessage();
+            return [];
+        }
+    }
+
     public function lister_recette($nom_recette){
         try{
             $requete = $this->bdd->prepare("SELECT * FROM recettes WHERE nom_recette=?");
@@ -99,6 +111,12 @@ class RecetteDAO {
         }catch(PDOException $e){
             echo "Erreur lors de la réupération de l'ingrédient".$e->getMessage();
             return [];
+        }
+    }
+
+    public function ajouter_recette($nom_recette,$instruction,$tmp_prep,$id_categorie){
+        try{
+            $requete = $this->bdd->prepare("INSERT INTO recettes VALUES ($nom_recette, $instruction, $tmp_prep)");
         }
     }
 
