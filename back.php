@@ -73,7 +73,6 @@ class RecetteDAO {
             $requete = $this->bdd->prepare("SELECT * FROM recettes");
             $requete->execute();
             $resultat = $requete->fetchAll(PDO::FETCH_ASSOC);
-            print_r($resultat);
             foreach($resultat as $recette){
                 $rec = new Recette($recette["nom_recette"], $recette["instructions"], $recette["tmp_prep"]);
                 array_push($liste_recette, $rec);
