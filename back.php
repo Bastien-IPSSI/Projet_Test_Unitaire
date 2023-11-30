@@ -7,8 +7,9 @@ try {
     $user = DB_USER;
     $pwd = DB_PWD;
     $db_name = DB_NAME;
+    $db_port = DB_PORT;
 
-    $connexion = new PDO("mysql:host=$host;dbname=$db_name", $user, $pwd);
+    $connexion = new PDO("mysql:host=$host;port=$db_port;dbname=$db_name", $user, $pwd);
     $connexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (Exception $e) {
     echo "Erreur lors de la connexion à la database : " . $e->getMessage();
@@ -67,11 +68,16 @@ class RecetteDAO {
     }
 
     public function afficher_recettes(){
+        $liste_recette = [];
         try{
             $requete = $this->bdd->prepare("SELECT * FROM recettes");
             $requete->execute();
             $resultat = $requete->fetch(PDO::FETCH_ASSOC);
-            return $resultat;
+            foreach($resultat as $recette){
+                $rec = new Recette($recette["nom_recette"], $recette["instructions"], $recette["tmp_prep"]);
+                array_push($liste_recette, $rec);
+            }
+            return $liste_recette;
         }catch(PDOException $e){
             echo "Erreur lors de la récupération ".$e->getMessage();
             return [];
@@ -117,6 +123,11 @@ class RecetteDAO {
     public function ajouter_recette($nom_recette,$instruction,$tmp_prep,$id_categorie){
         try{
             $requete = $this->bdd->prepare("INSERT INTO recettes VALUES ($nom_recette, $instruction, $tmp_prep)");
+            $requete->execute([$nom_recette,$instruction,$tmp_prep,$id_categorie]);
+            return true;
+        }catch(PDOException $e){
+            echo "Erreur lors de l'insertion".$e->getMessage();
+            return false;
         }
     }
 
@@ -221,6 +232,9 @@ private $db;
         $this->db = $db;
     }
 
+    public function getIdCatégorie(){
+
+    }
     public function getCategorie($id_categorie){
         try{
             $requete = $this->db->prepare("SELECT nom_categorie FROM categories WHERE id_categorie = :id_categorie");
