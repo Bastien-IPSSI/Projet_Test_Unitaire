@@ -123,29 +123,28 @@ class RecetteDAO {
     public function ajouter_recette($nom_recette,$instruction,$tmp_prep,$id_categorie, $lst_ingredients, $ingredientsDAO){
 
         // Insertion de la recette dans la table recette
-
-        try{
-            $requete = $this->bdd->prepare("INSERT INTO recettes VALUES (:nom_recette, :instructions, :tmp_prep, :id_categorie)");
-            $requete->execute([
-                ":nom_recette" => $nom_recette,
-                ":instructions" => $instruction,
-                ":tmp_prep" => $tmp_prep,
-                ":id_categorie" => $id_categorie
-            ]);
-        }catch(PDOException $e){
-            echo "Erreur lors de l'insertion".$e->getMessage();
-        }
-
-        // Insertion des ingredients dans la table ingredients
-
-        foreach($lst_ingredients as $ingredient){
-            $ingredientsDAO->addIngredient($ingredient["nom_ingredient"]);
-        }
-
-        // Insertion des ingredients dans la table recetteingredient
-
-        foreach($lst_ingredients as $ingredient){
-            $ingredientsDAO->addIngredientToRecette($this->getID($nom_recette), $ingredientsDAO->getIdIngredient($ingredient["nom_ingredient"]), $ingredient["quantite"]);
+        if(!empty($nom_recette) && !empty($instruction) && !empty($tmp_prep) && !empty($id_categorie)){
+            try{
+                $requete = $this->bdd->prepare("INSERT INTO recettes (nom_recette, instructions, tmp_prep, id_categorie) VALUES (?, ?, ?, ?)");
+                $requete->execute([$nom_recette,$instruction,$tmp_prep,$id_categorie]);
+            }catch(PDOException $e){
+                echo "Erreur lors de l'insertion".$e->getMessage();
+            }
+    
+            // Insertion des ingredients dans la table ingredients
+    
+            foreach($lst_ingredients as $ingredient){
+                $ingredientsDAO->addIngredient($ingredient["nom_ingredient"]);
+            }
+    
+            // Insertion des ingredients dans la table recetteingredient
+    
+            foreach($lst_ingredients as $ingredient){
+                $ingredientsDAO->addIngredientToRecette($this->getID($nom_recette), $ingredientsDAO->getIdIngredient($ingredient["nom_ingredient"]), $ingredient["quantite"]);
+            }
+            
+        }else{
+            throw new InvalidArgumentException("Valeurs vides");
         }
     }
 
@@ -317,8 +316,16 @@ private $db;
         $this->db = $db;
     }
 
-    public function getIdCatégorie(){
-
+    public function getIdCategorie($nom_categorie){
+        try{
+            $requete = $this->db->prepare("SELECT id_categorie FROM categories WHERE nom_categorie=?");
+            $requete->execute([$nom_categorie]);
+            $id_categorie = $requete->fetchAll(PDO::FETCH_ASSOC);
+            return $id_categorie[0]["id_categorie"];
+        }catch(PDOException $e){
+            echo "Erreur lors de la récupération de l'id".$e->getMessage();
+            return [];
+        }
     }
     public function getCategorie($id_categorie){
         try{
