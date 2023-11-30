@@ -120,14 +120,32 @@ class RecetteDAO {
         }
     }
 
-    public function ajouter_recette($nom_recette,$instruction,$tmp_prep,$id_categorie){
+    public function ajouter_recette($nom_recette,$instruction,$tmp_prep,$id_categorie, $lst_ingredients, $ingredientsDAO){
+
+        // Insertion de la recette dans la table recette
+
         try{
-            $requete = $this->bdd->prepare("INSERT INTO recettes VALUES ($nom_recette, $instruction, $tmp_prep)");
-            $requete->execute([$nom_recette,$instruction,$tmp_prep,$id_categorie]);
-            return true;
+            $requete = $this->bdd->prepare("INSERT INTO recettes VALUES (:nom_recette, :instructions, :tmp_prep, :id_categorie)");
+            $requete->execute([
+                ":nom_recette" => $nom_recette,
+                ":instructions" => $instruction,
+                ":tmp_prep" => $tmp_prep,
+                ":id_categorie" => $id_categorie
+            ]);
         }catch(PDOException $e){
             echo "Erreur lors de l'insertion".$e->getMessage();
-            return false;
+        }
+
+        // Insertion des ingredients dans la table ingredients
+
+        foreach($lst_ingredients as $ingredient){
+            $ingredientsDAO->addIngredient($ingredient["nom_ingredient"]);
+        }
+
+        // Insertion des ingredients dans la table recetteingredient
+
+        foreach($lst_ingredients as $ingredient){
+            $ingredientsDAO->addIngredientToRecette($this->getID($nom_recette), $ingredientsDAO->getIdIngredient($ingredient["nom_ingredient"]), $ingredient["quantite"]);
         }
     }
 
@@ -241,7 +259,7 @@ private $db;
 
     public function addIngredientToRecette($id_recette, $id_ingredient, $quantite){
         try{
-            $requete = $this->db->prepare("INSERT INTO recettes_ingredients(id_recette, id_ingredient, quantite) VALUES (:id_recette, :id_ingredient, :quantite)");
+            $requete = $this->db->prepare("INSERT INTO recetteingredient(id_recette, id_ingredient, quantite) VALUES (:id_recette, :id_ingredient, :quantite)");
             $requete->execute([
                 ":id_recette" => $id_recette,
                 ":id_ingredient" => $id_ingredient,
@@ -296,6 +314,19 @@ private $db;
         }
         catch(Exception $e){
             echo "Erreur lors de la récupération de la catégorie : ".$e->getMessage();
+            die();
+        }
+    }
+
+    public function addCategorie($nom_categorie){
+        try{
+            $requete = $this->db->prepare("INSERT INTO categories(nom_categorie) VALUES (:nom_categorie)");
+            $requete->execute([
+                ":nom_categorie" => $nom_categorie
+            ]);
+        }
+        catch(Exception $e){
+            echo "Erreur lors de l'ajout de la catégorie : ".$e->getMessage();
             die();
         }
     }
