@@ -10,7 +10,7 @@
 
 <body>
     <nav>
-         <!-- Bouton qui renvoie vers l'accueil. Si on appuie sur ce bouton, on vide le $_POST["search"] -->
+        <!-- Bouton qui renvoie vers l'accueil. Si on appuie sur ce bouton, on vide le $_POST["search"] -->
         <form action="front.php" method="POST">
             <input type="submit" name="accueil" value="Accueil">
         </form>
@@ -34,40 +34,39 @@
         if (empty($_GET["search"])) {
             $recettesDAO = new RecetteDAO($connexion);
             $ingredientsDAO = new IngredientDAO($connexion);
+            $categorieDAO = new CategorieDAO($connexion);
             $recettes = $recettesDAO->afficher_recettes();
-        }else{
+        } else {
             // Sinon, on affiche les recettes qui correspondent à la recherche
             $recettesDAO = new RecetteDAO($connexion);
             $ingredientsDAO = new IngredientDAO($connexion);
+            $categorieDAO = new CategorieDAO($connexion);
             $recettes = $recettesDAO->rechercher_recette($_GET["search"]);
         }
 
         foreach ($recettes as $recette) {
-            echo "<div class='recette'>";
+            $categorie = $categorieDAO->getCategorie($recettesDAO->getIdCategorie($recette->getNomRecette()));
+            echo "<div class='recette $categorie'>";
             echo "<h2>" . $recette->getNomRecette() . "</h2>";
             echo "<p>" . $recette->getInstructions() . "</p>";
             echo "<p>Temps de préparation : " . $recette->getTmp_prep() . " minutes</p>";
             // On affiche les ingrédients de la recette
+            echo "<div class='ingredients'>";
+            echo "<p>Ingrédients : </p>";
             $ingredients = $ingredientsDAO->getAllIngredientOfRecette(intval($recettesDAO->getID($recette->getNomRecette())));
+            echo "<p>";
             foreach ($ingredients as $ingredient) {
-                echo "<p>" . $ingredient->getNomIngredient() . "</p>";
+                echo $ingredient->getNomIngredient() . " : " . $ingredient->getQuantite() . "g, ";
             }
+            echo "</p>";
+            echo "</div>";
             echo "</div>";
         }
         ?>
     </div>
     <div class="addRecette">
-        <!-- Formulaire qui permet d'ajouter une recette -->
-        <!-- Lorsqu'on clique sur submit, on utilise la fonction ajouter_recette -->
         <form action="front.php" method="POST">
-            <input type="text" name="nomRecette" placeholder="Nom de la recette">
-            <input type="text" name="instructions" placeholder="Instructions">
-            <input type="number" name="tmp_prep" placeholder="Temps de préparation">
-            <select name="categorie">
-                <option value="Poisson">Poisson</option>
-                <option value="Vegetarien">Vegetarien</option>
-                <option value="Viande">Viande</option>
-            </select>
+
             <!-- Input qui permet de rentrer le nombre d'ingredient que l'on veut ajouter -->
             <!-- Si l'utilisateur choisi par exemple d'en ajouter 2, on affiche 2 input pour entrer l'ingredient et sa quantité -->
 
@@ -78,29 +77,42 @@
                 $nb_ingredients = $_POST["nb_ingredients"];
                 echo "<input type='hidden' name='nb_ingredients' value='$nb_ingredients'>";
                 for ($i = 0; $i < $nb_ingredients; $i++) {
-                    echo "<input type='text' name='nom_ingredient$i' placeholder='Nom de l ingredient'>";
+                    $id_affiche = $i + 1;
+                    echo "<input type='text' name='nom_ingredient$i' placeholder=\"Nom de l'ingredient $id_affiche\">";
                     echo "<input type='number' name='quantite$i' placeholder='Quantité'>";
                 }
             }
-            ?>  
-            <input type="submit" name="ajouter_recette" value="Ajouter une recette">
-            <?php
-            if (isset($_POST["ajouter_recette"])) {
-                $lst_ingredients = [];
-                $categorieDAO = new CategorieDAO($connexion);
-                for ($i = 0; $i < $_POST["nb_ingredients"]; $i++) {
-                    array_push($lst_ingredients, ["nom_ingredient" => $_POST["nom_ingredient$i"], "quantite" => $_POST["quantite$i"]]);
-                }
-                $recettesDAO->ajouter_recette(
-                    $_POST["nomRecette"],
-                    $_POST["instructions"],
-                    $_POST["tmp_prep"],
-                    $categorieDAO->getIdCategorie($_POST["categorie"]),
-                    $lst_ingredients,
-                    $ingredientsDAO,
-                );
-            }
             ?>
+
+            <input type="text" name="nomRecette" placeholder="Nom de la recette">
+            <input type="text" name="instructions" placeholder="Instructions">
+            <input type="number" name="tmp_prep" placeholder="Temps de préparation">
+            <select name="categorie">
+                <option value="Poisson">Poisson</option>
+                <option value="Vegetarien">Vegetarien</option>
+                <option value="Viande">Viande</option>
+            </select>
+            </div>
+            <div class="submitButton">
+                <input type="submit" name="ajouter_recette" value="Ajouter une recette">
+                <?php
+                if (isset($_POST["ajouter_recette"])) {
+                    $lst_ingredients = [];
+                    $categorieDAO = new CategorieDAO($connexion);
+                    for ($i = 0; $i < $_POST["nb_ingredients"]; $i++) {
+                        array_push($lst_ingredients, ["nom_ingredient" => $_POST["nom_ingredient$i"], "quantite" => $_POST["quantite$i"]]);
+                    }
+                    $recettesDAO->ajouter_recette(
+                        $_POST["nomRecette"],
+                        $_POST["instructions"],
+                        $_POST["tmp_prep"],
+                        $categorieDAO->getIdCategorie($_POST["categorie"]),
+                        $lst_ingredients,
+                        $ingredientsDAO,
+                    );
+                }
+                ?>
+            </div>
         </form>
     </div>
 </body>

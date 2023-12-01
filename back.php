@@ -107,6 +107,18 @@ class RecetteDAO {
         }
     }
 
+    public function getIdCategorie($nom_recette){
+        try{
+            $requete = $this->bdd->prepare("SELECT id_categorie FROM recettes WHERE nom_recette = ?");
+            $requete->execute([$nom_recette]);
+            $resultat = $requete->fetch(PDO::FETCH_ASSOC);
+            return $resultat["id_categorie"];
+        }catch(PDOException $e){
+            echo "Erreur lors de la récupération de l'id de la catégorie ".$e->getMessage();
+            return;
+        }
+    }
+
     public function afficher_la_recette($idRecette)
     {
         try{
@@ -192,20 +204,22 @@ class RecetteDAO {
 class Ingredient{
 
     private $nom_ingredient;
+    private $quantite;
 
-    public function __construct($nom_ingredient)
+    public function __construct($nom_ingredient, $quantite)
     {
         $this->nom_ingredient = $nom_ingredient;
+        $this->quantite = $quantite;
     }
 
     public function getNomIngredient(){
         return $this->nom_ingredient;
     }
 
-    public function setNomIngredient($nom_ingredient)
-    {
-        $this->nom_ingredient = $nom_ingredient;
+    public function getQuantite(){
+        return $this->quantite;
     }
+
 }
 
 
@@ -237,12 +251,13 @@ private $db;
 
         foreach($ids_ingredient as $id_ingredient){
             try{
-                $requete = $this->db->prepare("SELECT nom_ingredient FROM ingredients WHERE id_ingredient = :id_ingredient");
+                $requete = $this->db->prepare("SELECT nom_ingredient, quantite FROM ingredients INNER JOIN recetteingredient ON ingredients.id_ingredient = recetteingredient.id_ingredient WHERE ingredients.id_ingredient = :id_ingredient");
                 $requete->execute([
                     ":id_ingredient" => $id_ingredient
                 ]);
                 $resultat = $requete->fetch(PDO::FETCH_ASSOC);
-                array_push($ingredients, new Ingredient($resultat["nom_ingredient"]));
+                $ingredient = new Ingredient($resultat["nom_ingredient"], $resultat["quantite"]);
+                array_push($ingredients, $ingredient);
             }
             catch(Exception $e){
                 echo "Erreur lors de la récupération des ingrédients de la recette : ".$e->getMessage();

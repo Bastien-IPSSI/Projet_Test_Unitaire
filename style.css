@@ -1,9 +1,11 @@
+
 nav{
     height: 100px;
     background-color: rgba(0, 0, 0, 0.13);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 10px;
 }
 
 .recettes{
@@ -15,12 +17,49 @@ nav{
 }
 
 .recette{
-    width: 300px;
-    height: 600px;
-    background-color: rgba(0, 0, 0, 0.319);
-    margin-bottom: 50px;
+    width: 250px;
+    height: 400px;
+    border : 1px solid black;
+    border-radius: 5px;
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: center;
+    margin: 10px;
+    padding: 10px;
 }
+
+.recette > h2{
+    font-size: 20px;
+    font-weight: bold;
+    color: rgb(0, 0, 0);
+    margin: 0px;
+}
+
+.recette > p{
+    font-size: 15px;
+    font-weight: bold;
+    color: rgb(0, 0, 0);
+    margin: 0px;
+}
+
+.Poisson{
+    background-color: rgba(34, 48, 204, 0.13);
+}
+
+.Viande{
+    background-color: rgba(215, 29, 35, 0.13);
+}
+
+.Vegetarien{
+    background-color: rgba(0, 255, 0, 0.13);
+}
+
+.submitButton{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
