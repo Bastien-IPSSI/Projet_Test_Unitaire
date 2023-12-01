@@ -121,7 +121,7 @@
             <!-- Input qui permet de rentrer le nombre d'ingredient que l'on veut ajouter -->
             <!-- Si l'utilisateur choisi par exemple d'en ajouter 2, on affiche 2 input pour entrer l'ingredient et sa quantité -->
 
-            <input type="number" name="nb_ingredients" placeholder="Nombre d'ingrédients">
+            <input type="number" min=1 name="nb_ingredients" placeholder="Nombre d'ingrédients">
             <input class="input" type="submit" name="nb_ingredients_submit" value="Valider">
             <?php
             if (isset($_POST["nb_ingredients_submit"]) && !empty($_POST["nb_ingredients"]) && is_numeric($_POST["nb_ingredients"])) {
@@ -137,7 +137,7 @@
 
             <input type="text" name="nomRecette" placeholder="Nom de la recette">
             <input type="text" name="instructions" placeholder="Instructions">
-            <input type="number" name="tmp_prep" placeholder="Temps de préparation">
+            <input type="number" min=1 name="tmp_prep" placeholder="Temps de préparation">
             <select name="categorie">
                 <?php
                 foreach ($categories as $categorie) {
