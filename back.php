@@ -43,20 +43,6 @@ class Recette {
     {
         return $this->tmp_prep;
     }
-
-    public function setNomRecette($nom_recette){
-        $this->nom_recette=$nom_recette;
-    }
-
-    public function setInstructions($instructions)
-    {
-        $this->instructions = $instructions;
-    }
-
-    public function setTmp_prep($tmp_prep)
-    {
-        $this->tmp_prep = $tmp_prep;
-    }
 }
 
 class RecetteDAO {
@@ -84,17 +70,6 @@ class RecetteDAO {
         }
     }
 
-    public function lister_recette($nom_recette){
-        try{
-            $requete = $this->bdd->prepare("SELECT * FROM recettes WHERE nom_recette=?");
-            $requete->execute([$nom_recette]);
-            $result = $requete->fetch(PDO::FETCH_ASSOC);
-            return $result;
-        }catch(PDOException $e){
-            echo "Erreur lors de la récupération des recettes ".$e->getMessage();
-            return [];
-        }
-    }
     public function getID($nom_recette){
         try{
             $requete = $this->bdd->prepare("SELECT id_recette FROM recettes WHERE nom_recette = ?");
@@ -116,19 +91,6 @@ class RecetteDAO {
         }catch(PDOException $e){
             echo "Erreur lors de la récupération de l'id de la catégorie ".$e->getMessage();
             return;
-        }
-    }
-
-    public function afficher_la_recette($idRecette)
-    {
-        try{
-            $requete = $this->bdd->prepare("SELECT * FROM recettes WHERE id_recette=?");
-            $requete->execute([$idRecette]);
-            $result = $requete->fetch(PDO::FETCH_ASSOC);
-            return $result;
-        }catch(PDOException $e){
-            echo "Erreur lors de la réupération de l'ingrédient".$e->getMessage();
-            return [];
         }
     }
 
@@ -216,6 +178,24 @@ class RecetteDAO {
         }catch(PDOException $e){
             echo "Erreur lors de la récupération ".$e->getMessage();
             return [];
+        }
+    }
+
+    public function supprimer_recette($id_recette){
+        // Suppression des ingredients de la recette dans la table recetteingredient
+        try{
+            $requete = $this->bdd->prepare("DELETE FROM recetteingredient WHERE id_recette = ?");
+            $requete->execute([$id_recette]);
+        }catch(PDOException $e){
+            echo "Erreur lors de la suppression".$e->getMessage();
+        }
+
+        // Suppression de la recette dans la table recettes
+        try{
+            $requete = $this->bdd->prepare("DELETE FROM recettes WHERE id_recette = ?");
+            $requete->execute([$id_recette]);
+        }catch(PDOException $e){
+            echo "Erreur lors de la suppression".$e->getMessage();
         }
     }
 
@@ -407,19 +387,6 @@ private $db;
         }
         catch(Exception $e){
             echo "Erreur lors de la récupération de la catégorie : ".$e->getMessage();
-            die();
-        }
-    }
-
-    public function addCategorie($nom_categorie){
-        try{
-            $requete = $this->db->prepare("INSERT INTO categories(nom_categorie) VALUES (:nom_categorie)");
-            $requete->execute([
-                ":nom_categorie" => $nom_categorie
-            ]);
-        }
-        catch(Exception $e){
-            echo "Erreur lors de l'ajout de la catégorie : ".$e->getMessage();
             die();
         }
     }
