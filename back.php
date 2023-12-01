@@ -122,8 +122,27 @@ class RecetteDAO {
 
     public function ajouter_recette($nom_recette,$instruction,$tmp_prep,$id_categorie, $lst_ingredients, $ingredientsDAO){
 
+        // Vérifier si la recette existe déjà
+        try{
+            $requete = $this->bdd->prepare("SELECT COUNT(*) FROM recettes WHERE nom_recette = :nom_recette");
+            $requete->execute([
+                ":nom_recette" => $nom_recette
+            ]);
+            
+            $exists = $requete->fetchColumn();
+
+            if ($exists) {
+                // La recette existe déjà, on ne l'ajoute pas sans afficher d'erreur
+                echo "La recette existe déjà";
+            }
+        } catch (PDOException $e) {
+            // Gérer l'erreur si nécessaire
+            echo "Erreur lors de l'ajout de la recette : " . $e->getMessage();
+            die();
+        }
+
         // Insertion de la recette dans la table recette
-        if(!empty($nom_recette) && !empty($instruction) && !empty($tmp_prep) && !empty($id_categorie)){
+        if(!empty($nom_recette) && !empty($instruction) && !empty($tmp_prep) && !empty($id_categorie) && $exists == 0){
             try{
                 $requete = $this->bdd->prepare("INSERT INTO recettes (nom_recette, instructions, tmp_prep, id_categorie) VALUES (?, ?, ?, ?)");
                 $requete->execute([$nom_recette,$instruction,$tmp_prep,$id_categorie]);
@@ -132,19 +151,22 @@ class RecetteDAO {
             }
     
             // Insertion des ingredients dans la table ingredients
-    
+
             foreach($lst_ingredients as $ingredient){
                 $ingredientsDAO->addIngredient($ingredient["nom_ingredient"]);
             }
     
             // Insertion des ingredients dans la table recetteingredient
     
-            foreach($lst_ingredients as $ingredient){
-                $ingredientsDAO->addIngredientToRecette($this->getID($nom_recette), $ingredientsDAO->getIdIngredient($ingredient["nom_ingredient"]), $ingredient["quantite"]);
+            for($i=0; $i<count($lst_ingredients); $i++){
+                $ingredientsDAO->addIngredientToRecette($this->getID($nom_recette), $ingredientsDAO->getIdIngredient($lst_ingredients[$i]["nom_ingredient"]), $lst_ingredients[$i]["quantite"]);
             }
             
-        }else{
-            throw new InvalidArgumentException("Valeurs vides");
+        }elseif($exists == 1){
+            echo "<p>La recette existe déjà</p>";
+        }
+        else{
+            echo "<p>Erreur lors de l'ajout de la recette</p>";
         }
     }
 
@@ -261,17 +283,29 @@ private $db;
     }
 
     public function addIngredient($nom_ingredient){
-        try{
-            $requete = $this->db->prepare("INSERT INTO ingredients(nom_ingredient) VALUES (:nom_ingredient)");
-            $requete->execute([
+        try {
+            // Vérifier d'abord si l'ingrédient existe
+            $existsQuery = $this->db->prepare("SELECT COUNT(*) FROM ingredients WHERE nom_ingredient = :nom_ingredient");
+            $existsQuery->execute([
                 ":nom_ingredient" => $nom_ingredient
             ]);
-        }
-        catch(Exception $e){
-            echo "Erreur lors de l'ajout de l'ingrédient : ".$e->getMessage();
+            
+            $exists = $existsQuery->fetchColumn();
+    
+            if (!$exists) {
+                // L'ingrédient n'existe pas, on l'ajoute
+                $insertQuery = $this->db->prepare("INSERT INTO ingredients(nom_ingredient) VALUES (:nom_ingredient)");
+                $insertQuery->execute([
+                    ":nom_ingredient" => $nom_ingredient
+                ]);
+            }
+        } catch (PDOException $e) {
+            // Gérer l'erreur si nécessaire
+            echo "Erreur lors de l'ajout de l'ingrédient : " . $e->getMessage();
             die();
         }
     }
+    
 
     public function addIngredientToRecette($id_recette, $id_ingredient, $quantite){
         try{
