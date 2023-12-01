@@ -102,25 +102,6 @@
             }
             ?>
         </form>
-        <?php
-        if (isset($_POST["ajouter_recette"])) {
-            $lst_ingredients = [];
-            array_push($lst_ingredients, ["nom_ingredient" => $_POST["nom_ingredient"], "quantite" => $_POST["quantite"]]);
-            $categorie = new Categorie($_POST["categorie"]);
-            $nom_categorie = $categorie->getCategorie();
-            $categorieDAO = new CategorieDAO($connexion);
-            $recettesDAO->ajouter_recette(
-                $_POST["nomRecette"],
-                $_POST["instructions"],
-                $_POST["tmp_prep"],
-                $categorieDAO->getIdCategorie($nom_categorie),
-                $lst_ingredients,
-                $ingredientsDAO,
-            );
-            exit();
-        }
-        ?>
-
     </div>
 </body>
 
