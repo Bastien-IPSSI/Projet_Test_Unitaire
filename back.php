@@ -199,6 +199,26 @@ class RecetteDAO {
         }
     }
 
+    public function rechercher_recette_par_categorie($categorie){
+        // On recupere l'id de la categorie
+        $categorieDAO = new CategorieDAO($this->bdd);
+        $id_categorie = $categorieDAO->getIdCategorie($categorie);
+        $liste_recette = [];
+        try{
+            $requete = $this->bdd->prepare("SELECT * FROM recettes WHERE id_categorie = ?");
+            $requete->execute([$id_categorie]);
+            $resultat = $requete->fetchAll(PDO::FETCH_ASSOC);
+            foreach($resultat as $recette){
+                $rec = new Recette($recette["nom_recette"], $recette["instructions"], $recette["tmp_prep"]);
+                array_push($liste_recette, $rec);
+            }
+            return $liste_recette;
+        }catch(PDOException $e){
+            echo "Erreur lors de la récupération ".$e->getMessage();
+            return [];
+        }
+    }
+
 }
 
 class Ingredient{
@@ -401,6 +421,23 @@ private $db;
         catch(Exception $e){
             echo "Erreur lors de l'ajout de la catégorie : ".$e->getMessage();
             die();
+        }
+    }
+
+    public function getAllCategorie(){
+        $liste_categorie = [];
+        try{
+            $requete = $this->db->prepare("SELECT * FROM categories");
+            $requete->execute();
+            // Renvoi une liste de chaine de caractère qui correspondent aux nom des categories
+            $resultat = $requete->fetchAll(PDO::FETCH_ASSOC);
+            foreach($resultat as $categorie){
+                array_push($liste_categorie, $categorie["nom_categorie"]);
+            }
+            return $liste_categorie;
+        }catch(PDOException $e){
+            echo "Erreur lors de la récupération ".$e->getMessage();
+            return [];
         }
     }
 }

@@ -10,7 +10,6 @@
 
 <body>
     <nav>
-        <!-- Bouton qui renvoie vers l'accueil. Si on appuie sur ce bouton, on vide le $_POST["search"] -->
         <form action="front.php" method="POST">
             <input type="submit" name="accueil" value="Accueil">
         </form>
@@ -21,22 +20,56 @@
         ?>
 
         <h1>Recettes</h1>
-        <!-- Création d'une barre de recherche -->
         <form action="front.php" method="GET">
             <input type="text" name="search" placeholder="Rechercher une recette">
-            <input type="submit" value="Rechercher">
+            <input type="submit" name="search_submit" value="Rechercher">
         </form>
+        <?php
+        if (isset($_GET["search_submit"])) {
+            $_POST["search"] = $_GET["search"];
+        }
+        ?>
+        <form action="front.php" method="POST">
+            <select name="categorie">
+                <option value="Poisson">Poisson</option>
+                <option value="Vegetarien">Vegetarien</option>
+                <option value="Viande">Viande</option>
+            </select>
+            <input type="submit" name="categorie_submit" value="Valider">
+        </form>
+        <?php
+        if (isset($_POST["categorie_submit"])) {
+            $_POST["search"] = $_POST["categorie"];
+        }
+        ?>
+
+        
     </nav>
     <div class="recettes">
         <?php
         require_once "./back.php";
+
+        // On récupere la liste des categories disponibles
+        $categorieDAO = new CategorieDAO($connexion);
+        $categories = $categorieDAO->getAllCategorie();
+
+
         // Si la recherche est vide, on affiche toutes les recettes
-        if (empty($_GET["search"])) {
+        if (empty($_POST["search"])) {
             $recettesDAO = new RecetteDAO($connexion);
             $ingredientsDAO = new IngredientDAO($connexion);
             $categorieDAO = new CategorieDAO($connexion);
-            $recettes = $recettesDAO->afficher_recettes();
-        } else {
+            $recettes = $recettesDAO->afficher_recettes();    
+        }
+        // Si la recherche est une categorie, on affiche les recettes de cette categorie
+        
+        elseif(in_array($_POST["search"], $categories)){
+            $recettesDAO = new RecetteDAO($connexion);
+            $ingredientsDAO = new IngredientDAO($connexion);
+            $categorieDAO = new CategorieDAO($connexion);
+            $recettes = $recettesDAO->rechercher_recette_par_categorie($_POST["categorie"]);
+        }
+         else {
             // Sinon, on affiche les recettes qui correspondent à la recherche
             $recettesDAO = new RecetteDAO($connexion);
             $ingredientsDAO = new IngredientDAO($connexion);
