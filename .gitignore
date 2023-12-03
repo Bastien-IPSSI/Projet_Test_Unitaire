@@ -1,1 +1,5 @@
 ./config.php
+./vendors
+./phpunit.xml
+./composer.json
+./composer.lock
